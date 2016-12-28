@@ -1,6 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+/**
+ * @brief This script class detects an enterance of a coin to a road, and creates another road and 2 buildings on left and right of the generated road.
+ * 
+ * 
+ */
 public class MapGenerator : MonoBehaviour {
 	public Material[] buildingMaterials;
 	public GameObject[] buildings;
@@ -16,32 +21,39 @@ public class MapGenerator : MonoBehaviour {
 	
 	}
 
-	public void SpawnChunk (Vector3 roadPosition) {
+	void OnTriggerEnter(Collider other) {
+		if (other.tag == "Coin") {
+			SpawnRoad(this.transform.position  + new Vector3(15.0f, 0.0f, 0.0f));
+		}
+	}
+
+	public void SpawnRoad (Vector3 roadPosition) {
 		SpawnBuildingInternal (roadPosition, true);
 		SpawnBuildingInternal (roadPosition, false);
-		SpawnRoadInternal (roadPosition);
+		SpawnPathInternal (roadPosition);
 	}
 
 	void SpawnBuildingInternal (Vector3 roadPosition, bool isLeft) {
-		GameObject building = (GameObject) Instantiate (buildings [Random.Range (0, buildings.Length)]);
-		building.GetComponent<Renderer>().material = buildingMaterials[Random.Range (0, buildingMaterials.Length)];
+		GameObject buildingCreated = (GameObject) Instantiate (buildings [Random.Range (0, buildings.Length)]);
+		buildingCreated.GetComponent<Renderer>().material = buildingMaterials[Random.Range (0, buildingMaterials.Length)];
 
 		if (!isLeft) {
-			building.transform.position = new Vector3(building.transform.position.x,
-			                                          building.transform.position.y,
-			                                          -building.transform.position.z);
+			// Move the building to the opposite side of the road
+			buildingCreated.transform.position = new Vector3(buildingCreated.transform.position.x,
+			                                                 buildingCreated.transform.position.y,
+			                                                 -buildingCreated.transform.position.z);
 
-			building.transform.eulerAngles = new Vector3(building.transform.eulerAngles.x,
-			                                             building.transform.eulerAngles.y + 180,
-			                                             building.transform.eulerAngles.z);
+			buildingCreated.transform.eulerAngles = new Vector3(buildingCreated.transform.eulerAngles.x,
+			                                             		buildingCreated.transform.eulerAngles.y + 180,
+			                                             		buildingCreated.transform.eulerAngles.z);
 		}
 
-		building.transform.position += roadPosition;
+		buildingCreated.transform.position += roadPosition;
 
-		building.AddComponent<MapCleaner>();
+		buildingCreated.AddComponent<MapCleaner>();
 	}
 
-	void SpawnRoadInternal (Vector3 roadPosition) {
+	void SpawnPathInternal (Vector3 roadPosition) {
 		GameObject roadCreated = (GameObject) Instantiate (road);
 		roadCreated.transform.position = roadPosition;
 
